@@ -38,7 +38,7 @@ async function run(){
         app.post('/purchase',async(req,res)=>{
           const product=req.body;
           const results=await purchaseCollection.insertOne(product)
-          console.log(results)
+          
           res.json(results)
         })
      
@@ -49,6 +49,49 @@ async function run(){
           
           res.send(products)
         })
+
+
+         //get with email
+         app.get('/order', async (req, res) => {
+          const email = req.query.email;
+          // const date = new Date(req.query.date).toLocaleDateString();
+
+          const query = { email: email }
+          console.log(query)
+
+          const cursor = purchaseCollection.find(query);
+          const manageOrder = await cursor.toArray();
+          res.json(manageOrder);
+      })
+
+        // get all order collection 
+        app.get('/allOrders',async(req,res)=>{
+          const cursors=purchaseCollection.find({})
+          const purchase=await cursors .toArray()
+          res.send(purchase)
+
+        })
+         // delete api 
+         app.get('/allOrders/:id', async (req, res) => {
+          const id = req.params.id;
+          const query = { _id: ObjectId(id) };
+          const user = await purchaseCollection.findOne(query);
+          // console.log('load user with id: ', id);
+          res.send(user);
+      })
+      app.delete('/allOrders/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await purchaseCollection.deleteOne(query);
+
+        console.log('deleting user with id ', result);
+
+        res.json(result);
+    })
+
+         
+
+
            // get single api 
            app.get('/products/:id',async(req,res)=>{
             const id=req.params.id;
@@ -57,6 +100,8 @@ async function run(){
             const product = await productCollections.findOne(query);
             res.json(product);
           })
+
+         
 
     }
     finally{
