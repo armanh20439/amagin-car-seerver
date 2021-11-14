@@ -1,4 +1,5 @@
 const express = require('express');
+const ObjectId = require('mongodb').ObjectId;
 
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
@@ -21,24 +22,41 @@ async function run(){
       
         const database =client.db('carHouse')
         const productCollections=database.collection('products')
+        const purchaseCollection=database.collection('purchase-item')
         
         // post api 
         app.post('/product',async(req,res)=>{
           const service=req.body
-            console.log('hit the post api',service)
+          
             
             const result = await productCollections.insertOne(service);
             console.log(result);
             res.json(result)
         });
 
+        // purchase post
+        app.post('/purchase',async(req,res)=>{
+          const product=req.body;
+          const results=await purchaseCollection.insertOne(product)
+          console.log(results)
+          res.json(results)
+        })
+     
         // get api 
         app.get('/products',async(req,res)=>{
           const cursor =productCollections.find({})
           const products=await cursor.toArray()
-          console.log(products)
+          
           res.send(products)
         })
+           // get single api 
+           app.get('/products/:id',async(req,res)=>{
+            const id=req.params.id;
+            console.log('geting id',id)
+            const query = { _id: ObjectId(id) };
+            const product = await productCollections.findOne(query);
+            res.json(product);
+          })
 
     }
     finally{
